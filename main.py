@@ -1,5 +1,10 @@
 from fastapi import FastAPI
 from api import courses, sections, users
+from db.db_setup import engine
+from db.models import user, course
+
+user.Base.metadata.create_all(bind=engine)
+course.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="FastAPI LMS",
@@ -16,6 +21,8 @@ app = FastAPI(
         "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
     },
 )
+
+
 
 
 app.include_router(users.router)
