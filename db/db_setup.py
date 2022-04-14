@@ -20,7 +20,7 @@ async_session = sessionmaker(
 Base = declarative_base()
 
 
-async def async_get_db():
+async def get_db():
     async with async_session() as session:
         yield session
         await session.commit()
