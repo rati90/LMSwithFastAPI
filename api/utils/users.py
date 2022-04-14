@@ -1,4 +1,3 @@
-from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -7,23 +6,27 @@ from pydantic_schemas.user import UserCreate
 
 
 async def get_user(db: AsyncSession, user_id: int):
-
     query = select(User).where(User.id == user_id)
     result = await db.execute(query)
     return result.scalar_one_or_none()
 
 
-def get_user_by_email(db: Session, email: str):
-    return db.query(User).filter(User.email == email).first()
+async def get_user_by_email(db: AsyncSession, email: str):
+    query = select(User).where(User.email == email)
+    result = await db.execute(query)
+    return result.scalar_one_or_none()
 
 
-def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(User).offset(skip).limit(limit).all()
+async def get_users(db: AsyncSession, skip: int = 0, limit: int = 100):
+    query = select(User)
+    result = await db.execute(query)
+    return result.scalars().all()
 
 
-def create_user(db: Session, user: UserCreate):
+async def create_user(db: AsyncSession, user: UserCreate):
     db_user = User(email=user.email, role=user.role, is_active=user.is_active)
     db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
+    await db.commit()
+    await db.refresh(db_user)
+
     return db_user
