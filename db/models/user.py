@@ -16,7 +16,9 @@ class User(Timestamp, Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(100), unique=True, index=True, nullable=False)
     email = Column(String(100), unique=True, index=True, nullable=False)
+    hashed_password = Column(String(250), nullable=False)
     role = Column(Enum(Role))
     is_active = Column(Boolean, default=False)
 

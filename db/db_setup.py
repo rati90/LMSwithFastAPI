@@ -4,16 +4,17 @@ from sqlalchemy.orm import sessionmaker
 
 
 SQLALCHEMY_DATABASE_URL = (
-    "postgresql+asyncpg://postgres:password@localhost:5432/lms3"
+    "postgresql+asyncpg://postgres:password@localhost:5432/lms4"
 )
 
-engine = create_async_engine(
-    SQLALCHEMY_DATABASE_URL,
-)
-#                              echo=True
+engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=True)
 
 async_session = sessionmaker(
-    engine, class_=AsyncSession, expire_on_commit=False
+    engine,
+    expire_on_commit=False,
+    autocommit=False,
+    autoflush=False,
+    class_=AsyncSession,
 )
 
 

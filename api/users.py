@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.services.auhontication import get_current_active_user
 from db.db_setup import get_db
-from pydantic_schemas.user import UserCreate, User
+from pydantic_schemas.user import User, UserInDB
 from pydantic_schemas.courses import Course
-from api.utils.users import get_users, get_user, get_user_by_email, create_user
+from api.utils.users import get_users, get_user, create_user, get_user_by_email
 from api.utils.courses import get_user_courses
 
 router = APIRouter(
@@ -14,25 +15,10 @@ router = APIRouter(
 )
 
 
-@router.get("/all", response_model=list[User])
-async def read_users(
-    skip: int = 0,
-    limit: int = 100,
-    db: AsyncSession = Depends(get_db),
-):
-    users = await get_users(db, skip=skip, limit=limit)
-    if users is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-
-    return users
-
-
 @router.post(
-    "/create", response_model=User, status_code=status.HTTP_201_CREATED
+    "/create", status_code=status.HTTP_201_CREATED, response_model=User
 )
-async def create_new_user(
-    user: UserCreate, db: AsyncSession = Depends(get_db)
-):
+async def create_new_user(user: UserInDB, db: AsyncSession = Depends(get_db)):
     db_user = await get_user_by_email(db=db, email=user.email)
     if db_user:
         raise HTTPException(
@@ -43,7 +29,21 @@ async def create_new_user(
     return await create_user(db=db, user=user)
 
 
-@router.get("/{user_id}", response_model=User)
+@router.get("/all", response_model=list[User])
+async def read_users(
+    db: AsyncSession = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+    current_user: User = Depends(get_current_active_user),
+):
+    users = await get_users(db=db, skip=skip, limit=limit)
+    if users is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+    return users
+
+
+@router.get("/{user_id}")
 async def read_user(user_id: int, db: AsyncSession = Depends(get_db)):
     db_user = await get_user(db=db, user_id=user_id)
     if db_user is None:

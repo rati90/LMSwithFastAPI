@@ -3,13 +3,14 @@ from datetime import datetime
 
 
 class UserBase(BaseModel):
+    username: str
     email: str
     role: int = 2
     is_active: bool = True
 
 
-class UserCreate(UserBase):
-    ...
+class UserInDB(UserBase):
+    hashed_password: str
 
 
 class User(UserBase):
@@ -20,4 +21,3 @@ class User(UserBase):
 
     class Config:
         orm_mode = True
-
