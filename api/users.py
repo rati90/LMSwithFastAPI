@@ -4,8 +4,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.services.auhontication import get_current_active_user
 from db.db_setup import get_db
 from pydantic_schemas.user import User, UserInDB
+from pydantic_schemas.profile import ProfileCreate, Profile
 from pydantic_schemas.courses import Course
-from api.utils.users import get_users, get_user, create_user, get_user_by_email
+from api.utils.users import (
+    get_users,
+    get_user,
+    create_user,
+    get_user_by_email,
+    get_profile,
+    create_profile,
+    get_update_profile,
+)
 from api.utils.courses import get_user_courses
 
 router = APIRouter(
@@ -41,6 +50,53 @@ async def read_users(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
     return users
+
+
+@router.get("/profile")
+async def read_user_profile(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    db_profile = await get_profile(db=db, user_id=current_user.id)
+    if db_profile is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    return db_profile
+
+
+@router.post("/profile/create", response_model=Profile)
+async def create_new_profile(
+    profile: ProfileCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    db_profile = await get_profile(db=db, user_id=current_user.id)
+    if db_profile:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Profile already exists",
+        )
+
+    return await create_profile(
+        db=db, profile=profile, user_id=current_user.id
+    )
+
+
+@router.patch("/profile")
+async def update_course(
+    update_info: dict[str, str],
+    db: AsyncSession = Depends(
+        get_db,
+    ),
+    current_user: User = Depends(get_current_active_user),
+):
+
+    db_profile = await get_profile(db=db, user_id=current_user.id)
+    if db_profile:
+        return await get_update_profile(
+            db=db, user_id=current_user.id, update_info=update_info
+        )
+
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
 @router.get("/{user_id}")

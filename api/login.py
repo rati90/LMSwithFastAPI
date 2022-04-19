@@ -14,7 +14,7 @@ from api.services.authtoken import Token
 from db.db_setup import get_db
 from pydantic_schemas.user import User
 
-router = APIRouter(prefix="", tags=["LOG"])
+router = APIRouter(prefix="", tags=["Log"])
 
 
 @router.post("/token", response_model=Token)
