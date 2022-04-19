@@ -1,7 +1,7 @@
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-
+from fastapi import status, HTTPException
 from api.services import auhontication
 from db.models.user import User, Profile
 from pydantic_schemas.profile import ProfileCreate
@@ -78,7 +78,6 @@ async def get_update_profile(
 async def create_profile(
     db: AsyncSession, profile: ProfileCreate, user_id: int
 ):
-
     db_profile = Profile(
         first_name=profile.first_name,
         last_name=profile.last_name,
@@ -90,3 +89,15 @@ async def create_profile(
     await db.refresh(db_profile)
 
     return db_profile
+
+
+async def user_is_admin(current_user: User):
+    if current_user.role == 3:
+        print("\n\n\n\n\n\n\n", current_user.role)
+        return True
+
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You are not authorized person",
+        )

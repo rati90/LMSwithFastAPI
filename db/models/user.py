@@ -10,6 +10,7 @@ from .mixins import Timestamp
 class Role(enum.IntEnum):
     teacher = 1
     student = 2
+    admin = 3
 
 
 class User(Timestamp, Base):
@@ -18,7 +19,7 @@ class User(Timestamp, Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(100), unique=True, index=True, nullable=False)
     email = Column(String(100), unique=True, index=True, nullable=False)
-    hashed_password = Column(String(250), nullable=False)
+    hashed_password = Column(String(300), nullable=False)
     role = Column(Enum(Role))
     is_active = Column(Boolean, default=False)
 

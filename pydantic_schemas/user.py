@@ -5,7 +5,7 @@ from datetime import datetime
 class UserBase(BaseModel):
     username: str
     email: str
-    role: int = 2
+    role: int
     is_active: bool = True
 
 

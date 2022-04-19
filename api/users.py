@@ -14,6 +14,7 @@ from api.utils.users import (
     get_profile,
     create_profile,
     get_update_profile,
+    user_is_admin,
 )
 from api.utils.courses import get_user_courses
 
@@ -45,11 +46,9 @@ async def read_users(
     limit: int = 100,
     current_user: User = Depends(get_current_active_user),
 ):
-    users = await get_users(db=db, skip=skip, limit=limit)
-    if users is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-
-    return users
+    if await user_is_admin(current_user):
+        users = await get_users(db=db, skip=skip, limit=limit)
+        return users
 
 
 @router.get("/profile")
